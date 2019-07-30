@@ -4,13 +4,17 @@ from flask import render_template, request, redirect
 
 from datetime import datetime
 
+
 @app.template_filter("clean_date")
 def clean_date(dt):
     return dt.strftime("%d %b %Y")
 
-@app.route('/') # decorator('/) function will "fire" index() when entering this url
+
+# decorator('/) function will "fire" index() when entering this url
+@app.route('/')
 def index():
     return render_template("public/index.html")
+
 
 @app.route('/jinja')
 def jinja():
@@ -37,7 +41,7 @@ def jinja():
             self.name = name
             self.description = description
             self.url = url
-        
+
         def pull(self):
             return f"Pulling repo {self.name}"
 
@@ -60,14 +64,16 @@ def jinja():
     suspicious = "<script>alert('You got hacked!')</script>"
 
     return render_template('public/jinja.html', my_name=my_name, age=age,
-    langs=langs, friends=friends, colours=colours,
-    cool=cool, GitRemote=GitRemote, repeat=repeat,
-    my_remote=my_remote, date=date, my_html=my_html,
-    suspicious=suspicious)
+                           langs=langs, friends=friends, colours=colours,
+                           cool=cool, GitRemote=GitRemote, repeat=repeat,
+                           my_remote=my_remote, date=date, my_html=my_html,
+                           suspicious=suspicious)
+
 
 @app.route('/about')
 def about():
     return render_template("public/about.html")
+
 
 @app.route('/sign-up', methods=["GET", "POST"])
 def sign_up():
@@ -77,10 +83,41 @@ def sign_up():
 
         username = req["username"]
         email = req.get("email")
-        password = request.form["password"] #pull straight from form
+        password = request.form["password"]  # pull straight from form
 
         print(username, email, password)
 
         return redirect(request.url)
 
     return render_template('public/sign_up.html')
+
+
+users = {
+    "mitsuhiko": {
+        "name": "Armin Ronacher",
+        "bio": "Creator of the Flask framework",
+        "twitter_handle": "@mitsuhiko"
+    },
+    "gvanrossum": {
+        "name": "Guido Van Rossum",
+        "bio": "Creator of the Python programming language",
+        "twitter_handle": "@gvanrossum"
+    },
+    "elonmusk": {
+        "name": "Elon Musk",
+        "bio": "technology entrepreneur, investor, and engineer",
+        "twitter_handle": "@elonmusk"
+    }
+}
+
+@app.route("/profile/<username>")
+def profile(username):
+    user = None
+    if username in users:
+        user = users[username]
+
+    return render_template("public/profile.html", username=username, user=user)
+
+@app.route("/multiple/<foo>/<bar>/<baz>")
+def multi(foo, bar, baz):
+    return f"foo is {bar} bar is {baz} baz is {foo}"
