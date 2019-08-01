@@ -13,6 +13,9 @@ def clean_date(dt):
 # decorator('/) function will "fire" index() when entering this url
 @app.route('/')
 def index():
+
+    print(app.config)
+
     return render_template("public/index.html")
 
 
@@ -160,3 +163,29 @@ def create_entry():
     res = make_response(jsonify(req), 200)
 
     return res
+
+@app.route("/query")
+def query():
+    
+    if request.args:
+        
+        args = request.args
+        
+        # The items() returns a list of dictionary's (key, value) 
+        # tuple pairs.
+        for k, v in args.items():
+            print(f"{k}: {v}")
+
+        if "foo" in args:
+            foo = args.get("foo")
+            #foo = args["foo"]
+            #foo = request.args.get("foo")
+            print(foo)
+
+        serialized = ", ".join(f"{k}: {v}" for k, v in args.items())
+        
+        return f"(Query) {serialized}", 200
+    
+    else:
+
+        return "No query recieved", 200
