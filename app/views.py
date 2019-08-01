@@ -13,9 +13,10 @@ def clean_date(dt):
 # decorator('/) function will "fire" index() when entering this url
 @app.route('/')
 def index():
+    #print(f"Flask ENV is set to: {app.config['ENV']}")
 
-    print(app.config)
-
+    print(app.config["DB_NAME"])
+    
     return render_template("public/index.html")
 
 
