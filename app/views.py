@@ -4,6 +4,7 @@ from flask import render_template, request, redirect, jsonify, make_response
 
 from datetime import datetime
 
+import os
 
 @app.template_filter("clean_date")
 def clean_date(dt):
@@ -189,3 +190,26 @@ def query():
     else:
 
         return "No query recieved", 200
+
+# put in config file later
+app.config["IMAGE_UPLOADS"] = "/Users/servetcoskun/app/app/static/img/uploads"
+
+
+
+@app.route("/upload-image", methods=["GET","POST"])
+def upload_image():
+
+    if request.method == "POST":
+
+        if request.files:
+
+            # file storage object
+            image = request.files["image"]
+
+            image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
+
+            print("Image saved")
+
+            return redirect(request.url)
+
+    return render_template("public/upload_image.html")
