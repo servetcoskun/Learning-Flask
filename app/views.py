@@ -1,6 +1,6 @@
 from app import app
 
-from flask import render_template, request, redirect, jsonify, make_response
+from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort
 
 from datetime import datetime
 
@@ -247,3 +247,52 @@ def upload_image():
             return redirect(request.url)
 
     return render_template("public/upload_image.html")
+
+'''
+string:
+int:
+float:
+path:
+uuid:
+'''
+
+app.config["CLIENT_IMAGES"] = "/Users/servetcoskun/app/app/static/client/img"
+app.config["CLIENT_CSV"] = "/Users/servetcoskun/app/app/static/client/csv"
+app.config["CLIENT_REPORTS"] = "/Users/servetcoskun/app/app/static/client/reports"
+
+
+
+# using converters
+@app.route("/get-image/<image_name>")
+def get_image(image_name):
+
+    try:
+        return send_from_directory(app.config["CLIENT_IMAGES"], 
+                                   filename=image_name, 
+                                   as_attachment=False)
+    except FileNotFoundError:
+        abort(404)
+
+   
+        
+@app.route("/get-csv/<filename>")
+def get_csv(filename):
+
+    try:
+        return send_from_directory(app.config["CLIENT_CSV"], 
+                                   filename=filename, 
+                                   as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
+
+
+
+@app.route("/get-report/<path:path>")
+def get_report(path):
+
+    try:
+        return send_from_directory(app.config["CLIENT_REPORTS"], 
+                                   filename=path, 
+                                   as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
