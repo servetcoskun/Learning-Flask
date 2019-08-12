@@ -1,6 +1,7 @@
 from app import app
 from flask import render_template, request, redirect, jsonify, \
-                  send_from_directory, abort, request, make_response
+                  send_from_directory, abort, request, make_response, \
+                  session, url_for
 
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -115,6 +116,7 @@ users = {
     }
 }
 
+"""
 @app.route("/profile/<username>")
 def profile(username):
     user = None
@@ -122,7 +124,7 @@ def profile(username):
         user = users[username]
 
     return render_template("public/profile.html", username=username, user=user)
-
+"""
 @app.route("/multiple/<foo>/<bar>/<baz>")
 def multi(foo, bar, baz):
     return f"foo is {bar} bar is {baz} baz is {foo}"
@@ -323,7 +325,88 @@ def cookies():
         samesite = False
     )
 
+    # simpler cookies key and value
     res.set_cookie("chocolate type", "dark")
     res.set_cookie("chewy", "yes")
 
     return res
+
+
+
+app.config["SECRET_KEY"] = 'JtmpXV5_5edD3yRrsaO5IA'
+
+users = {
+    "julian": {
+        "username": "julian",
+        "email": "julian@gmail.com",
+        "password": "example",
+        "bio": "Some guy from the internet"
+    },
+    "clarissa": {
+        "username": "clarissa",
+        "email": "clarissa@icloud.com",
+        "password": "sweetpotato22",
+        "bio": "Sweet potato is life"
+    }
+}
+
+"""
+This is just an example and is NOT secure for production!
+Password is not secure enough witn base64 encoding!
+Only use this in development!
+Do not put sensitive information in session object!
+"""
+@app.route("/sign-in", methods=["GET", "POST"])
+def sign_in():
+
+    if request.method == "POST":
+
+        req = request.form
+
+        username = req.get("username")
+        password = req.get("password")
+
+        if not username in users:
+            print("Username not found")
+            return redirect(request.url)
+        else:
+            # if user is in database get save their username in user variable
+            user=users[username]
+        
+        if not password == user["password"]:
+            print("Password incorrect")
+            return redirect(request.url)
+
+        else:
+            # start using session object. Similar to a python dictionary
+            # session[KEY] = VALUE
+            # Do not put sensitive information in session object! Only example
+            session["USERNAME"] = user["username"]
+            print(session) # SecureCookieSession 
+            print("User added to session")
+            return redirect(url_for("profile"))
+
+
+    return render_template("public/sign_in.html")
+
+
+@app.route("/profile")
+def profile():
+    # session object is available globally! Even in jinja templates
+    # --if username is not None-- do the following
+    if session.get("USERNAME", None) is not None:
+        username = session.get("USERNAME")
+        user = users[username]
+        return render_template("public/profile2.html", user=user)
+    else:
+        print("Username not found in session")
+        return redirect(url_for("sign_in"))
+
+
+@app.route("/sign-out")
+def sign_out():
+
+    # avoid popping when None
+    session.pop("USERNAME", None)
+
+    return redirect(url_for("sign_in"))
