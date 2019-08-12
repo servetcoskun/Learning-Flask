@@ -1,12 +1,11 @@
 from app import app
-
-from flask import render_template, request, redirect, jsonify, make_response, send_from_directory, abort
+from flask import render_template, request, redirect, jsonify, \
+                  send_from_directory, abort, request, make_response
 
 from datetime import datetime
-
+from werkzeug.utils import secure_filename
 import os
 
-from werkzeug.utils import secure_filename
 
 @app.template_filter("clean_date")
 def clean_date(dt):
@@ -248,6 +247,10 @@ def upload_image():
 
     return render_template("public/upload_image.html")
 
+app.config["CLIENT_IMAGES"] = "/Users/servetcoskun/app/app/static/client/img"
+app.config["CLIENT_CSV"] = "/Users/servetcoskun/app/app/static/client/csv"
+app.config["CLIENT_REPORTS"] = "/Users/servetcoskun/app/app/static/client/reports"
+
 '''
 string:
 int:
@@ -255,12 +258,6 @@ float:
 path:
 uuid:
 '''
-
-app.config["CLIENT_IMAGES"] = "/Users/servetcoskun/app/app/static/client/img"
-app.config["CLIENT_CSV"] = "/Users/servetcoskun/app/app/static/client/csv"
-app.config["CLIENT_REPORTS"] = "/Users/servetcoskun/app/app/static/client/reports"
-
-
 
 # using converters
 @app.route("/get-image/<image_name>")
@@ -296,3 +293,37 @@ def get_report(path):
                                    as_attachment=True)
     except FileNotFoundError:
         abort(404)
+
+
+@app.route("/cookies")
+def cookies():
+
+    res = make_response("Cookies", 200)
+    
+    cookies = request.cookies
+
+    flavor = cookies.get("flavor")
+
+    choc_type = cookies.get("chocolate type")
+
+    chewy = cookies.get("chewy")
+
+    print(flavor, choc_type, chewy)
+
+    # cookie key and value
+    res.set_cookie(
+        "flavor", 
+        value = "chocolate chip",
+        max_age = 10,
+        expires = None,
+        path = request.path,
+        domain = None,
+        secure = False,
+        httponly = False,
+        samesite = False
+    )
+
+    res.set_cookie("chocolate type", "dark")
+    res.set_cookie("chewy", "yes")
+
+    return res
